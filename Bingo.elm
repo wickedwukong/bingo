@@ -2,9 +2,16 @@ module Bingo exposing (..)
 
 import Html
 
+-- palyerInfo name gameNumber =
+  -- name ++ " - Game #" ++ (toString gameNumber)
+
+palyerInfo =
+  \name gameNumber -> name ++ " - Game #" ++ (toString gameNumber)
+
+palyerInfoText name gameNumber =
+  palyerInfo name gameNumber
+  |> String.toUpper
+  |> Html.text
+
 main =
-  "Hello Xuemin"
-      |> String.toUpper
-      |> String.repeat 3
-      |> String.pad 100 '*' 
-      |> Html.text
+  palyerInfoText "Xuemin" 20
