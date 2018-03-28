@@ -22,7 +22,7 @@ type alias Model =
 -- MODEL
 initialModel : Model
 initialModel =
-  {name =  "Xuemin"
+  {name =  "mike"
   ,gameNumber =  3
   ,entries =  initialEntries
  }
@@ -64,11 +64,27 @@ viewFooter =
          [text "Powered by Elm"]
       ]
 
+viewEntryItem: Entry -> Html msg
+viewEntryItem entry =
+  li []
+   [ span [class "phrase"] [text entry.phrase]
+   , span [class "points"] [text (toString entry.points)]
+   ]
+
+viewEntryList : List Entry -> Html msg
+viewEntryList entries =
+  let
+     listOfEntries =
+       List.map viewEntryItem entries
+  in
+  ul [] listOfEntries
+
 view : Model -> Html msg
 view model =
   div [class "content"]
       [ viewHeader "BUZZWORD BINGO"
       , viewPlayer model.name model.gameNumber
+      , viewEntryList model.entries
       , div [class "debug"] [text (toString model)]
       , viewFooter
       ]

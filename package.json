@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "elm-live": "^2.7.5"
+    "elm-live": "^2.7.5",
+    "global": "^4.3.2"
   }
 }
