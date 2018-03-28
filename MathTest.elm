@@ -39,6 +39,12 @@ answer =
    div []
     [ input [ type_ "text", placeholder "What is your answer?"] []]
 
+-- [input
+--    [ type_ "text"
+--    , placeholder "What is your answer?"
+--    , autofocus True
+--    , onInput SetNameInput]]
+--
 view model =
   div [class "content"]
       [ viewHeader "Hello Ava! Welcome! Let's win the math challege!"
