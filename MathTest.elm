@@ -12,6 +12,18 @@ question =
   , points = 0
   }
 
+type alias Question =
+  { x : Int
+  , y : Int
+  , operator : String
+  , answer : Int
+  , solution : Int
+  }
+
+type alias Model =
+  { stars : Int
+  , history : List Question
+  }
 
 -- VIEW
 
