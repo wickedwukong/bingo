@@ -22,7 +22,15 @@ type alias Question =
 
 type alias Model =
   { stars : Int
+  , currentQuestion : Question
   , history : List Question
+  }
+
+initialModel : Model
+initialModel =
+  { stars = 0
+  , currentQuestion = Question 2 5 "+" 0 7
+  , history = []
   }
 
 -- VIEW
@@ -30,11 +38,14 @@ type alias Model =
 viewHeader : String -> Html msg
 viewHeader title =
   header []
-      [h1 [] [text title]]
+      [div [ class "siimple-box siimple-box--pink"]
+           [ div [class "siimple-box-title"] [text title]
+           , div [class "siimple-box-subtitle"] [text "Let's beat the math challenge!"]]
+      ]
 
 viewQuestion x operator y =
-  h2 [class "classy"]
-   [text (toString x ++ operator ++ toString y ++ "=???")]
+  div [class "classy"]
+   [(text (toString x ++ operator ++ toString y ++ "=")), (input [type_ "text", placeholder "What is your answer?", class "siimple-input"] [])]
 
 
 viewFooter =
@@ -42,6 +53,7 @@ viewFooter =
       [a [href "http://elm-lang.org"]
          [text "Powered by Elm"]
       ]
+
 showStars : Int -> Html msg
 showStars point =
   div []
@@ -58,14 +70,14 @@ answer =
 --    , onInput SetNameInput]]
 --
 view model =
-  div [class "content"]
-      [ viewHeader "Hello Ava! Welcome! Let's win the math challege!"
-      , showStars model.points
-      , viewQuestion model.x model.operator model.y
+  div [class "siimple-content--medium"]
+      [ viewHeader "Hello Ava, welcome!"
+      , showStars model.stars
+      , viewQuestion model.currentQuestion.x model.currentQuestion.operator model.currentQuestion.y
       , answer
       , div [class "debug"] [text (toString model)]
       , viewFooter
       ]
 
 main =
-  view question
+  view initialModel
