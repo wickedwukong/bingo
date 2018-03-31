@@ -81,22 +81,34 @@ update msg model =
         ({model | currentInput = input}, Cmd.none)
 
 -- VIEW
-
+showFeedback : Question -> Html Msg
+showFeedback q =
+  if (q.isSolutionCorrect) then
+    img [src "./happy.png", height 15, width 15] []
+  else
+    img [src "./sad.png", height 15, width 15] []
 
 viewQuestionItem: Question -> Html Msg
 viewQuestionItem q =
-  li []
-   [ span [] [text (toString q.x ++ q.operator ++ toString q.y ++ "=" ++ toString q.answer)]
-   , span [] [text (toString q.isSolutionCorrect)]
-   ]
-
+  div [ class "siimple-table-row"]
+       [ div [class "siimple-table-cell"] [text (toString q.x ++ q.operator ++ toString q.y ++ "=" ++ toString q.answer)]
+       , div [class "siimple-table-cell"] [showFeedback q]
+       , div [class "siimple-table-cell"] [text "abc"]
+       ]
+  -- li []
+  --  [ span [] [text (toString q.x ++ q.operator ++ toString q.y ++ "=" ++ toString q.answer)]
+  --  , span [] [showFeedback q]
+  --  ]
+  --
 viewHistory : List Question -> Html Msg
 viewHistory questions =
   let
      listOfQuestions =
        List.map viewQuestionItem questions
   in
-  ul [] listOfQuestions
+  div [class "siimple-table"]
+       [div [class "siimple-table-body siimple-table--border"] listOfQuestions]
+  -- ul [] listOfQuestions
 
 
 
@@ -109,7 +121,7 @@ viewHeader title =
       ]
 
 viewQuestion x operator y currentInput =
-  div []
+  div [class "siimple-h4"]
    [ text (toString x ++ operator ++ toString y ++ "=")
    , input
        [ type_ "text"
@@ -146,7 +158,7 @@ view model =
       [ viewHeader "Hello Ava, welcome!"
       , showStars model.stars
       , viewQuestion model.currentQuestion.x model.currentQuestion.operator model.currentQuestion.y model.currentInput
-      -- , div [class "debug"] [text (toString model)]
+      , div [class "debug"] [text (toString model)]
       , hr [] []
       , viewHistory model.history
       , viewFooter

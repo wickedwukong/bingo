@@ -9147,15 +9147,56 @@ var _user$project$MathTest$viewHeader = function (title) {
 			_1: {ctor: '[]'}
 		});
 };
+var _user$project$MathTest$showFeedback = function (q) {
+	return q.isSolutionCorrect ? A2(
+		_elm_lang$html$Html$img,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$src('./happy.png'),
+			_1: {
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$height(15),
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$width(15),
+					_1: {ctor: '[]'}
+				}
+			}
+		},
+		{ctor: '[]'}) : A2(
+		_elm_lang$html$Html$img,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$src('./sad.png'),
+			_1: {
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$height(15),
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$width(15),
+					_1: {ctor: '[]'}
+				}
+			}
+		},
+		{ctor: '[]'});
+};
 var _user$project$MathTest$viewQuestionItem = function (q) {
 	return A2(
-		_elm_lang$html$Html$li,
-		{ctor: '[]'},
+		_elm_lang$html$Html$div,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('siimple-table-row'),
+			_1: {ctor: '[]'}
+		},
 		{
 			ctor: '::',
 			_0: A2(
-				_elm_lang$html$Html$span,
-				{ctor: '[]'},
+				_elm_lang$html$Html$div,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('siimple-table-cell'),
+					_1: {ctor: '[]'}
+				},
 				{
 					ctor: '::',
 					_0: _elm_lang$html$Html$text(
@@ -9177,24 +9218,57 @@ var _user$project$MathTest$viewQuestionItem = function (q) {
 			_1: {
 				ctor: '::',
 				_0: A2(
-					_elm_lang$html$Html$span,
-					{ctor: '[]'},
+					_elm_lang$html$Html$div,
 					{
 						ctor: '::',
-						_0: _elm_lang$html$Html$text(
-							_elm_lang$core$Basics$toString(q.isSolutionCorrect)),
+						_0: _elm_lang$html$Html_Attributes$class('siimple-table-cell'),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: _user$project$MathTest$showFeedback(q),
 						_1: {ctor: '[]'}
 					}),
-				_1: {ctor: '[]'}
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$div,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('siimple-table-cell'),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text('abc'),
+							_1: {ctor: '[]'}
+						}),
+					_1: {ctor: '[]'}
+				}
 			}
 		});
 };
 var _user$project$MathTest$viewHistory = function (questions) {
 	var listOfQuestions = A2(_elm_lang$core$List$map, _user$project$MathTest$viewQuestionItem, questions);
 	return A2(
-		_elm_lang$html$Html$ul,
-		{ctor: '[]'},
-		listOfQuestions);
+		_elm_lang$html$Html$div,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('siimple-table'),
+			_1: {ctor: '[]'}
+		},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$div,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('siimple-table-body siimple-table--border'),
+					_1: {ctor: '[]'}
+				},
+				listOfQuestions),
+			_1: {ctor: '[]'}
+		});
 };
 var _user$project$MathTest$onEnter = function (msg) {
 	var isEnter = function (code) {
@@ -9303,7 +9377,11 @@ var _user$project$MathTest$viewQuestion = F4(
 	function (x, operator, y, currentInput) {
 		return A2(
 			_elm_lang$html$Html$div,
-			{ctor: '[]'},
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class('siimple-h4'),
+				_1: {ctor: '[]'}
+			},
 			{
 				ctor: '::',
 				_0: _elm_lang$html$Html$text(
@@ -9379,16 +9457,32 @@ var _user$project$MathTest$view = function (model) {
 					_1: {
 						ctor: '::',
 						_0: A2(
-							_elm_lang$html$Html$hr,
-							{ctor: '[]'},
-							{ctor: '[]'}),
+							_elm_lang$html$Html$div,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('debug'),
+								_1: {ctor: '[]'}
+							},
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html$text(
+									_elm_lang$core$Basics$toString(model)),
+								_1: {ctor: '[]'}
+							}),
 						_1: {
 							ctor: '::',
-							_0: _user$project$MathTest$viewHistory(model.history),
+							_0: A2(
+								_elm_lang$html$Html$hr,
+								{ctor: '[]'},
+								{ctor: '[]'}),
 							_1: {
 								ctor: '::',
-								_0: _user$project$MathTest$viewFooter,
-								_1: {ctor: '[]'}
+								_0: _user$project$MathTest$viewHistory(model.history),
+								_1: {
+									ctor: '::',
+									_0: _user$project$MathTest$viewFooter,
+									_1: {ctor: '[]'}
+								}
 							}
 						}
 					}
