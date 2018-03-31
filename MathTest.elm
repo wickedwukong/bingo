@@ -2,36 +2,60 @@ module MathTest exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (..)
+import Json.Decode as Json
+import Debug exposing (log)
 
 -- MODEL
-
-question =
-  { x = 1
-  , y = 1
-  , operator = "+"
-  , points = 0
-  }
-
 type alias Question =
   { x : Int
   , y : Int
   , operator : String
   , answer : Int
   , solution : Int
+  , isSolutionCorrect : Bool
   }
 
 type alias Model =
   { stars : Int
   , currentQuestion : Question
   , history : List Question
+  , currentInput : String
   }
 
 initialModel : Model
 initialModel =
   { stars = 0
-  , currentQuestion = Question 2 5 "+" 0 7
+  , currentQuestion = Question 2 5 "+" 0 7 False
   , history = []
+  , currentInput = ""
   }
+
+-- Update
+onEnter : Msg -> Attribute Msg
+onEnter msg =
+    let
+        isEnter code =
+            if code == 13 then
+                Json.succeed msg
+            else
+                Json.fail "not ENTER"
+    in
+        on "keydown" (Json.andThen isEnter keyCode)
+
+type Msg =
+  Solution | Input String
+
+update : Msg -> Model -> Model
+update msg model =
+  case msg of
+    Solution  ->
+      log "hello"
+      { model | stars = model.stars + 1}
+    Input input ->
+      case String.toInt(input) of
+        (Ok value) -> { model | currentInput = input}
+        _ -> model
 
 -- VIEW
 
@@ -44,24 +68,29 @@ viewHeader title =
       ]
 
 viewQuestion x operator y =
-  div [class "classy"]
-   [(text (toString x ++ operator ++ toString y ++ "=")), (input [type_ "text", placeholder "What is your answer?", class "siimple-input"] [])]
+  div []
+   [ text (toString x ++ operator ++ toString y ++ "=")
+   , input
+       [ type_ "text"
+       , placeholder "What is your answer?"
+       , class "siimple-input"
+       , autofocus True
+       , onEnter Solution
+       , onInput Input]
+       []
+    ]
 
 
 viewFooter =
-  footer []
-      [a [href "http://elm-lang.org"]
-         [text "Powered by Elm"]
+  footer [class "siimple-footer"]
+      [a [href "https://github.com/wickedwukong/bingo"]
+         [text "View source on Github"]
       ]
 
 showStars : Int -> Html msg
-showStars point =
+showStars stars =
   div []
-      [text "Ava, your stars: ***" ]
-
-answer =
-   div []
-    [ input [ type_ "text", placeholder "What is your answer?"] []]
+      [text ("Ava, your stars: " ++ (toString stars)) ]
 
 -- [input
 --    [ type_ "text"
@@ -70,14 +99,18 @@ answer =
 --    , onInput SetNameInput]]
 --
 view model =
-  div [class "siimple-content--medium"]
+  div [class "siimple-content--fluid", align "center"]
       [ viewHeader "Hello Ava, welcome!"
       , showStars model.stars
       , viewQuestion model.currentQuestion.x model.currentQuestion.operator model.currentQuestion.y
-      , answer
       , div [class "debug"] [text (toString model)]
       , viewFooter
       ]
 
+-- main =
+  -- view initialModel
+
 main =
-  view initialModel
+  Html.beginnerProgram { model = initialModel
+                       , view = view
+                       , update = update}
