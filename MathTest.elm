@@ -129,7 +129,9 @@ viewFooter =
 showStars : Int -> Html msg
 showStars stars =
   div []
-      [text ("Ava, your stars: " ++ (toString stars)) ]
+      [ text ("Ava, your stars: " ++ (toString stars))
+      , div [] (List.map (\x -> img [src "./star.jpeg", height 23, width 23] []) (List.range 1 stars))
+      ]
 
 -- [input
 --    [ type_ "text"
