@@ -4,6 +4,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Json.Decode as Json
+import Random exposing (..)
 import Debug exposing (log)
 
 -- MODEL
@@ -32,6 +33,10 @@ initialModel =
   }
 
 -- Update
+generateRandomNumber : Cmd Msg
+generateRandomNumber =
+    Random.generate NewRandom (Random.int 1 100)
+
 onEnter : Msg -> Attribute Msg
 onEnter msg =
     let
@@ -44,11 +49,18 @@ onEnter msg =
         on "keydown" (Json.andThen isEnter keyCode)
 
 type Msg =
-  Solution | Input String
+  Solution | Input String | NewRandom Int
 
-update : Msg -> Model -> Model
+makeQuestion : Int -> Question
+makeQuestion x =
+  Question x 5 "+" 0 (x + 5) False
+
+update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
+    NewRandom value ->
+      let newQuestion = makeQuestion value
+      in  ({model | currentQuestion = newQuestion}, Cmd.none)
     Solution ->
       case String.toInt(model.currentInput) of
         (Ok answer) ->
@@ -58,10 +70,10 @@ update msg model =
             isSolutionCorrect = answer == solution
             newCurrentQuestion = {oldCurrentQuestion | answer = answer, isSolutionCorrect = isSolutionCorrect}
           in
-            {model | stars = model.stars + 1, history = newCurrentQuestion :: model.history}
-        _ -> model
+            ({model | stars = model.stars + 1, history = newCurrentQuestion :: model.history, currentInput = ""}, generateRandomNumber)
+        _ -> (model, Cmd.none)
     Input input ->
-        {model | currentInput = input}
+        ({model | currentInput = input}, Cmd.none)
 
 -- VIEW
 
@@ -91,13 +103,14 @@ viewHeader title =
            , div [class "siimple-box-subtitle"] [text "Let's beat the math challenge!"]]
       ]
 
-viewQuestion x operator y =
+viewQuestion x operator y currentInput =
   div []
    [ text (toString x ++ operator ++ toString y ++ "=")
    , input
        [ type_ "text"
        , placeholder "What is your answer?"
        , class "siimple-input"
+       , value currentInput
        , autofocus True
        , onEnter Solution
        , onInput Input]
@@ -126,7 +139,7 @@ view model =
   div [class "siimple-content--fluid", align "center"]
       [ viewHeader "Hello Ava, welcome!"
       , showStars model.stars
-      , viewQuestion model.currentQuestion.x model.currentQuestion.operator model.currentQuestion.y
+      , viewQuestion model.currentQuestion.x model.currentQuestion.operator model.currentQuestion.y model.currentInput
       -- , div [class "debug"] [text (toString model)]
       , hr [] []
       , viewHistory model.history
@@ -136,7 +149,11 @@ view model =
 -- main =
   -- view initialModel
 
+main : Program Never Model Msg
 main =
-  Html.beginnerProgram { model = initialModel
-                       , view = view
-                       , update = update}
+    Html.program
+        { init = (initialModel, generateRandomNumber )
+        , view = view
+        , update = update
+        , subscriptions = (\_ -> Sub.none )
+        }
