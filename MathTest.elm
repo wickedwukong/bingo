@@ -81,6 +81,13 @@ update msg model =
         ({model | currentInput = input}, Cmd.none)
 
 -- VIEW
+showSolutionIfAnswerIsWrong : Question -> Html Msg
+showSolutionIfAnswerIsWrong q =
+  if (q.isSolutionCorrect) then
+    text ""
+  else
+    text (toString q.x ++ q.operator ++ toString q.y ++ "=" ++ toString q.solution)
+
 showFeedback : Question -> Html Msg
 showFeedback q =
   if (q.isSolutionCorrect) then
@@ -93,7 +100,7 @@ viewQuestionItem q =
   div [ class "siimple-table-row"]
        [ div [class "siimple-table-cell"] [text (toString q.x ++ q.operator ++ toString q.y ++ "=" ++ toString q.answer)]
        , div [class "siimple-table-cell"] [showFeedback q]
-       , div [class "siimple-table-cell"] [text "abc"]
+       , div [class "siimple-table-cell"] [showSolutionIfAnswerIsWrong q]
        ]
   -- li []
   --  [ span [] [text (toString q.x ++ q.operator ++ toString q.y ++ "=" ++ toString q.answer)]

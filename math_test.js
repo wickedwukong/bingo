@@ -9180,6 +9180,22 @@ var _user$project$MathTest$showFeedback = function (q) {
 		},
 		{ctor: '[]'});
 };
+var _user$project$MathTest$showSolutionIfAnswerIsWrong = function (q) {
+	return q.isSolutionCorrect ? _elm_lang$html$Html$text('') : _elm_lang$html$Html$text(
+		A2(
+			_elm_lang$core$Basics_ops['++'],
+			_elm_lang$core$Basics$toString(q.x),
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				q.operator,
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					_elm_lang$core$Basics$toString(q.y),
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						'=',
+						_elm_lang$core$Basics$toString(q.solution))))));
+};
 var _user$project$MathTest$viewQuestionItem = function (q) {
 	return A2(
 		_elm_lang$html$Html$div,
@@ -9240,7 +9256,7 @@ var _user$project$MathTest$viewQuestionItem = function (q) {
 						},
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html$text('abc'),
+							_0: _user$project$MathTest$showSolutionIfAnswerIsWrong(q),
 							_1: {ctor: '[]'}
 						}),
 					_1: {ctor: '[]'}
