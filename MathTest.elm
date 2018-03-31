@@ -49,15 +49,39 @@ type Msg =
 update : Msg -> Model -> Model
 update msg model =
   case msg of
-    Solution  ->
-      log "hello"
-      { model | stars = model.stars + 1}
-    Input input ->
-      case String.toInt(input) of
-        (Ok value) -> { model | currentInput = input}
+    Solution ->
+      case String.toInt(model.currentInput) of
+        (Ok answer) ->
+          let
+            oldCurrentQuestion = model.currentQuestion
+            solution = oldCurrentQuestion.solution
+            isSolutionCorrect = answer == solution
+            newCurrentQuestion = {oldCurrentQuestion | answer = answer, isSolutionCorrect = isSolutionCorrect}
+          in
+            {model | stars = model.stars + 1, history = newCurrentQuestion :: model.history}
         _ -> model
+    Input input ->
+        {model | currentInput = input}
 
 -- VIEW
+
+
+viewQuestionItem: Question -> Html Msg
+viewQuestionItem q =
+  li []
+   [ span [class "phrase"] [text (toString q.x ++ q.operator ++ toString q.y ++ "=" ++ toString q.answer)]
+   , span [class "points"] [text (toString q.isSolutionCorrect)]
+   ]
+
+viewHistory : List Question -> Html Msg
+viewHistory questions =
+  let
+     listOfQuestions =
+       List.map viewQuestionItem questions
+  in
+  ul [] listOfQuestions
+
+
 
 viewHeader : String -> Html msg
 viewHeader title =
@@ -104,6 +128,8 @@ view model =
       , showStars model.stars
       , viewQuestion model.currentQuestion.x model.currentQuestion.operator model.currentQuestion.y
       , div [class "debug"] [text (toString model)]
+      , hr [] []
+      , viewHistory model.history
       , viewFooter
       ]
 
