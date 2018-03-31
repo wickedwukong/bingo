@@ -69,8 +69,8 @@ update msg model =
 viewQuestionItem: Question -> Html Msg
 viewQuestionItem q =
   li []
-   [ span [class "phrase"] [text (toString q.x ++ q.operator ++ toString q.y ++ "=" ++ toString q.answer)]
-   , span [class "points"] [text (toString q.isSolutionCorrect)]
+   [ span [] [text (toString q.x ++ q.operator ++ toString q.y ++ "=" ++ toString q.answer)]
+   , span [] [text (toString q.isSolutionCorrect)]
    ]
 
 viewHistory : List Question -> Html Msg
@@ -127,7 +127,7 @@ view model =
       [ viewHeader "Hello Ava, welcome!"
       , showStars model.stars
       , viewQuestion model.currentQuestion.x model.currentQuestion.operator model.currentQuestion.y
-      , div [class "debug"] [text (toString model)]
+      -- , div [class "debug"] [text (toString model)]
       , hr [] []
       , viewHistory model.history
       , viewFooter
