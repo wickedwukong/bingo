@@ -72,7 +72,10 @@ update msg model =
             isSolutionCorrect = answer == solution
             newCurrentQuestion = {oldCurrentQuestion | answer = answer, isSolutionCorrect = isSolutionCorrect}
           in
-            ({model | stars = model.stars + 1, history = newCurrentQuestion :: model.history, currentInput = ""}, generateRandomNumbers)
+            if (isSolutionCorrect) then
+              ({model | stars = model.stars + 1, history = newCurrentQuestion :: model.history, currentInput = ""}, generateRandomNumbers)
+            else
+              ({model | history = newCurrentQuestion :: model.history, currentInput = ""}, generateRandomNumbers)
         _ -> (model, Cmd.none)
     Input input ->
         ({model | currentInput = input}, Cmd.none)
@@ -129,9 +132,8 @@ viewFooter =
 showStars : Int -> Html msg
 showStars stars =
   div []
-      [ text ("Ava, your stars: " ++ (toString stars))
-      , div [] (List.map (\x -> img [src "./star.jpeg", height 23, width 23] []) (List.range 1 stars))
-      ]
+       (List.map (\x -> img [src "./star.jpeg", height 23, width 23] []) (List.range 1 stars))
+
 
 -- [input
 --    [ type_ "text"

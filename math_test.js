@@ -9055,42 +9055,27 @@ var _user$project$MathTest$showStars = function (stars) {
 	return A2(
 		_elm_lang$html$Html$div,
 		{ctor: '[]'},
-		{
-			ctor: '::',
-			_0: _elm_lang$html$Html$text(
-				A2(
-					_elm_lang$core$Basics_ops['++'],
-					'Ava, your stars: ',
-					_elm_lang$core$Basics$toString(stars))),
-			_1: {
-				ctor: '::',
-				_0: A2(
-					_elm_lang$html$Html$div,
-					{ctor: '[]'},
-					A2(
-						_elm_lang$core$List$map,
-						function (x) {
-							return A2(
-								_elm_lang$html$Html$img,
-								{
-									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$src('./star.jpeg'),
-									_1: {
-										ctor: '::',
-										_0: _elm_lang$html$Html_Attributes$height(23),
-										_1: {
-											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$width(23),
-											_1: {ctor: '[]'}
-										}
-									}
-								},
-								{ctor: '[]'});
-						},
-						A2(_elm_lang$core$List$range, 1, stars))),
-				_1: {ctor: '[]'}
-			}
-		});
+		A2(
+			_elm_lang$core$List$map,
+			function (x) {
+				return A2(
+					_elm_lang$html$Html$img,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$src('./star.jpeg'),
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$height(23),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$width(23),
+								_1: {ctor: '[]'}
+							}
+						}
+					},
+					{ctor: '[]'});
+			},
+			A2(_elm_lang$core$List$range, 1, stars)));
 };
 var _user$project$MathTest$viewFooter = A2(
 	_elm_lang$html$Html$footer,
@@ -9277,12 +9262,21 @@ var _user$project$MathTest$update = F2(
 					var newCurrentQuestion = _elm_lang$core$Native_Utils.update(
 						oldCurrentQuestion,
 						{answer: _p5, isSolutionCorrect: isSolutionCorrect});
-					return {
+					return isSolutionCorrect ? {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{
 								stars: model.stars + 1,
+								history: {ctor: '::', _0: newCurrentQuestion, _1: model.history},
+								currentInput: ''
+							}),
+						_1: _user$project$MathTest$generateRandomNumbers
+					} : {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
 								history: {ctor: '::', _0: newCurrentQuestion, _1: model.history},
 								currentInput: ''
 							}),
