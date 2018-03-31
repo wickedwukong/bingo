@@ -33,9 +33,9 @@ initialModel =
   }
 
 -- Update
-generateRandomNumber : Cmd Msg
-generateRandomNumber =
-    Random.generate NewRandom (Random.int 1 100)
+generateRandomNumbers : Cmd Msg
+generateRandomNumbers =
+    Random.generate NewRandom (Random.list 2 (Random.int 0 100))
 
 onEnter : Msg -> Attribute Msg
 onEnter msg =
@@ -49,17 +49,19 @@ onEnter msg =
         on "keydown" (Json.andThen isEnter keyCode)
 
 type Msg =
-  Solution | Input String | NewRandom Int
+  Solution | Input String | NewRandom (List Int)
 
-makeQuestion : Int -> Question
-makeQuestion x =
-  Question x 5 "+" 0 (x + 5) False
+makeQuestion : List Int -> Question
+makeQuestion values =
+  case values of
+    x :: y :: _ -> Question x y "+" 0 (x + y) False
+    _ -> Question 0 0 "+" 0 0 False
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    NewRandom value ->
-      let newQuestion = makeQuestion value
+    NewRandom values ->
+      let newQuestion = makeQuestion values
       in  ({model | currentQuestion = newQuestion}, Cmd.none)
     Solution ->
       case String.toInt(model.currentInput) of
@@ -70,7 +72,7 @@ update msg model =
             isSolutionCorrect = answer == solution
             newCurrentQuestion = {oldCurrentQuestion | answer = answer, isSolutionCorrect = isSolutionCorrect}
           in
-            ({model | stars = model.stars + 1, history = newCurrentQuestion :: model.history, currentInput = ""}, generateRandomNumber)
+            ({model | stars = model.stars + 1, history = newCurrentQuestion :: model.history, currentInput = ""}, generateRandomNumbers)
         _ -> (model, Cmd.none)
     Input input ->
         ({model | currentInput = input}, Cmd.none)
@@ -152,7 +154,7 @@ view model =
 main : Program Never Model Msg
 main =
     Html.program
-        { init = (initialModel, generateRandomNumber )
+        { init = (initialModel, generateRandomNumbers )
         , view = view
         , update = update
         , subscriptions = (\_ -> Sub.none )
