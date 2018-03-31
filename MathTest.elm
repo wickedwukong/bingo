@@ -86,7 +86,7 @@ showSolutionIfAnswerIsWrong q =
   if (q.isSolutionCorrect) then
     text ""
   else
-    text (toString q.x ++ q.operator ++ toString q.y ++ "=" ++ toString q.solution)
+    text ("( ==> " ++ toString q.x ++ q.operator ++ toString q.y ++ "=" ++ toString q.solution ++ ")") 
 
 showFeedback : Question -> Html Msg
 showFeedback q =
@@ -99,8 +99,7 @@ viewQuestionItem: Question -> Html Msg
 viewQuestionItem q =
   div [ class "siimple-table-row"]
        [ div [class "siimple-table-cell"] [text (toString q.x ++ q.operator ++ toString q.y ++ "=" ++ toString q.answer)]
-       , div [class "siimple-table-cell"] [showFeedback q]
-       , div [class "siimple-table-cell"] [showSolutionIfAnswerIsWrong q]
+       , div [class "siimple-table-cell"] [showFeedback q, showSolutionIfAnswerIsWrong q]
        ]
   -- li []
   --  [ span [] [text (toString q.x ++ q.operator ++ toString q.y ++ "=" ++ toString q.answer)]
