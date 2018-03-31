@@ -9457,32 +9457,16 @@ var _user$project$MathTest$view = function (model) {
 					_1: {
 						ctor: '::',
 						_0: A2(
-							_elm_lang$html$Html$div,
-							{
-								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$class('debug'),
-								_1: {ctor: '[]'}
-							},
-							{
-								ctor: '::',
-								_0: _elm_lang$html$Html$text(
-									_elm_lang$core$Basics$toString(model)),
-								_1: {ctor: '[]'}
-							}),
+							_elm_lang$html$Html$hr,
+							{ctor: '[]'},
+							{ctor: '[]'}),
 						_1: {
 							ctor: '::',
-							_0: A2(
-								_elm_lang$html$Html$hr,
-								{ctor: '[]'},
-								{ctor: '[]'}),
+							_0: _user$project$MathTest$viewHistory(model.history),
 							_1: {
 								ctor: '::',
-								_0: _user$project$MathTest$viewHistory(model.history),
-								_1: {
-									ctor: '::',
-									_0: _user$project$MathTest$viewFooter,
-									_1: {ctor: '[]'}
-								}
+								_0: _user$project$MathTest$viewFooter,
+								_1: {ctor: '[]'}
 							}
 						}
 					}

@@ -158,7 +158,7 @@ view model =
       [ viewHeader "Hello Ava, welcome!"
       , showStars model.stars
       , viewQuestion model.currentQuestion.x model.currentQuestion.operator model.currentQuestion.y model.currentInput
-      , div [class "debug"] [text (toString model)]
+      -- , div [class "debug"] [text (toString model)]
       , hr [] []
       , viewHistory model.history
       , viewFooter
