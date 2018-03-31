@@ -86,7 +86,7 @@ showSolutionIfAnswerIsWrong q =
   if (q.isSolutionCorrect) then
     text ""
   else
-    text ("( ==> " ++ toString q.x ++ q.operator ++ toString q.y ++ "=" ++ toString q.solution ++ ")") 
+    text ("( ==> " ++ toString q.x ++ q.operator ++ toString q.y ++ "=" ++ toString q.solution ++ ")")
 
 showFeedback : Question -> Html Msg
 showFeedback q =
@@ -144,7 +144,7 @@ viewQuestion x operator y currentInput =
 viewFooter =
   footer [class "siimple-footer"]
       [a [href "https://github.com/wickedwukong/bingo"]
-         [text "View source on Github"]
+         [text "Source (by Xuemin Guan)"]
       ]
 
 showStars : Int -> Html msg
