@@ -121,7 +121,7 @@ viewHistory questions =
 viewHeader : String -> Html msg
 viewHeader title =
   header []
-      [div [ class "siimple-box siimple-box--pink"]
+      [div [ class "siimple-box siimple-box--orange"]
            [ div [class "siimple-box-title"] [text title]
            , div [class "siimple-box-subtitle"] [text "Let's beat the math challenge!"]]
       ]
@@ -144,7 +144,7 @@ viewQuestion x operator y currentInput =
 viewFooter =
   footer [class "siimple-footer"]
       [a [href "https://github.com/wickedwukong/bingo"]
-         [text "Source (by Xuemin Guan)"]
+         [text "View source on Github"]
       ]
 
 showStars : Int -> Html msg
@@ -161,7 +161,7 @@ showStars stars =
 --
 view model =
   div [class "siimple-content--fluid", align "center"]
-      [ viewHeader "Hello Ava, welcome!"
+      [ viewHeader "Hello Budding Mathematician, welcome!"
       , showStars model.stars
       , viewQuestion model.currentQuestion.x model.currentQuestion.operator model.currentQuestion.y model.currentInput
       -- , div [class "debug"] [text (toString model)]
