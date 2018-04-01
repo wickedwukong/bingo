@@ -53,11 +53,7 @@ randomOperatorGenerator =
 
 generateRandomOperator : Cmd Msg
 generateRandomOperator =
-  Random.generate NewRandomOperator randomOperatorGenerator
-
-generateRandomNumbers : Cmd Msg
-generateRandomNumbers =
-    Random.generate NewRandom (Random.list 2 (Random.int 0 100))
+  Random.generate RandomOperator randomOperatorGenerator
 
 under100Generator : String -> Generator BasicQuestion
 under100Generator operator =
@@ -73,8 +69,8 @@ under10Generator operator =
        (Random.int 0 10)
        (Random.int 0 10)
 
-newGenerateRandomNumbers : String -> Cmd Msg
-newGenerateRandomNumbers operator =
+generateBasicQuestion : String -> Cmd Msg
+generateBasicQuestion operator =
   if (operator == "+") then
        Random.generate NewNewRandom (under100Generator "+")
   else if (operator == "x") then
@@ -96,7 +92,7 @@ onEnter msg =
         on "keydown" (Json.andThen isEnter keyCode)
 
 type Msg =
-  Solution | Input String | NewRandom (List Int) | NewRandomOperator String | NewNewRandom BasicQuestion
+  Solution | Input String | NewRandom (List Int) | RandomOperator String | NewNewRandom BasicQuestion
 
 makeQuestion : List Int -> Question
 makeQuestion values =
@@ -118,8 +114,8 @@ newMakeQuestion bq =
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    NewRandomOperator operator ->
-      (model, newGenerateRandomNumbers operator)
+    RandomOperator operator ->
+      (model, generateBasicQuestion operator)
     NewNewRandom basicQuestion ->
       let newQuestion = newMakeQuestion basicQuestion
       in  ({model | currentQuestion = newQuestion}, Cmd.none)
