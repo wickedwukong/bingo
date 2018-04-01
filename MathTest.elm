@@ -121,7 +121,7 @@ viewHistory questions =
 viewHeader : String -> Html msg
 viewHeader title =
   header []
-      [div [ class "siimple-box siimple-box--orange"]
+      [div [ class "siimple-box siimple-box--teal"]
            [ div [class "siimple-box-title"] [text title]
            , div [class "siimple-box-subtitle"] [text "Let's beat the math challenge!"]]
       ]
@@ -150,7 +150,10 @@ viewFooter =
 showStars : Int -> Html msg
 showStars stars =
   div []
-       (List.map (\x -> img [src "./star.jpeg", height 23, width 23] []) (List.range 1 stars))
+        [ span [] [text ("Stars: " ++ toString stars)]
+        , div []
+               (List.map (\x -> img [src "./star.jpeg", height 23, width 23] []) (List.range 1 stars))
+         ]
 
 
 -- [input
