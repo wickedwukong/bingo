@@ -17,6 +17,12 @@ type alias Question =
   , isSolutionCorrect : Bool
   }
 
+type alias BasicQuestion =
+  { x : Int
+  , y : Int
+  , operator : String
+  }
+
 type alias Model =
   { stars : Int
   , currentQuestion : Question
@@ -33,9 +39,50 @@ initialModel =
   }
 
 -- Update
+toOperator : Int -> String
+toOperator i =
+  case i of
+    1 -> "x"
+    2 -> "+"
+    3 -> "-"
+    otherWise -> Debug.crash "Out of range"
+
+randomOperatorGenerator : Random.Generator String
+randomOperatorGenerator =
+    int 1 3 |> Random.map toOperator
+
+generateRandomOperator : Cmd Msg
+generateRandomOperator =
+  Random.generate NewRandomOperator randomOperatorGenerator
+
 generateRandomNumbers : Cmd Msg
 generateRandomNumbers =
     Random.generate NewRandom (Random.list 2 (Random.int 0 100))
+
+under100Generator : String -> Generator BasicQuestion
+under100Generator operator =
+   Random.map2
+       (\x y -> BasicQuestion x y operator)
+       (Random.int 0 100)
+       (Random.int 0 100)
+
+under10Generator : String -> Generator BasicQuestion
+under10Generator operator =
+   Random.map2
+       (\x y -> BasicQuestion x y operator)
+       (Random.int 0 10)
+       (Random.int 0 10)
+
+newGenerateRandomNumbers : String -> Cmd Msg
+newGenerateRandomNumbers operator =
+  if (operator == "+") then
+       Random.generate NewNewRandom (under100Generator "+")
+  else if (operator == "x") then
+       Random.generate NewNewRandom (under10Generator "x")
+  else
+       Random.generate NewNewRandom (under100Generator "-")
+
+
 
 onEnter : Msg -> Attribute Msg
 onEnter msg =
@@ -49,7 +96,7 @@ onEnter msg =
         on "keydown" (Json.andThen isEnter keyCode)
 
 type Msg =
-  Solution | Input String | NewRandom (List Int)
+  Solution | Input String | NewRandom (List Int) | NewRandomOperator String | NewNewRandom BasicQuestion
 
 makeQuestion : List Int -> Question
 makeQuestion values =
@@ -57,9 +104,25 @@ makeQuestion values =
     x :: y :: _ -> Question x y "+" 0 (x + y) False
     _ -> Question 0 0 "+" 0 0 False
 
+newMakeQuestion : BasicQuestion -> Question
+newMakeQuestion bq =
+  if (bq.operator == "+") then
+    Question bq.x bq.y bq.operator -99999999 (bq.x + bq.y) False
+  else if (bq.operator == "x") then
+    Question bq.x bq.y bq.operator -99999999 (bq.x * bq.y) False
+  else if (bq.x > bq.y) then
+    Question bq.x bq.y bq.operator -99999999 (bq.x - bq.y) False
+  else
+    Question bq.y bq.x bq.operator -99999999 (bq.y - bq.x) False
+
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
+    NewRandomOperator operator ->
+      (model, newGenerateRandomNumbers operator)
+    NewNewRandom basicQuestion ->
+      let newQuestion = newMakeQuestion basicQuestion
+      in  ({model | currentQuestion = newQuestion}, Cmd.none)
     NewRandom values ->
       let newQuestion = makeQuestion values
       in  ({model | currentQuestion = newQuestion}, Cmd.none)
@@ -73,9 +136,9 @@ update msg model =
             newCurrentQuestion = {oldCurrentQuestion | answer = answer, isSolutionCorrect = isSolutionCorrect}
           in
             if (isSolutionCorrect) then
-              ({model | stars = model.stars + 1, history = newCurrentQuestion :: model.history, currentInput = ""}, generateRandomNumbers)
+              ({model | stars = model.stars + 1, history = newCurrentQuestion :: model.history, currentInput = ""}, generateRandomOperator)
             else
-              ({model | history = newCurrentQuestion :: model.history, currentInput = ""}, generateRandomNumbers)
+              ({model | history = newCurrentQuestion :: model.history, currentInput = ""}, generateRandomOperator)
         _ -> (model, Cmd.none)
     Input input ->
         ({model | currentInput = input}, Cmd.none)
@@ -179,7 +242,7 @@ view model =
 main : Program Never Model Msg
 main =
     Html.program
-        { init = (initialModel, generateRandomNumbers )
+        { init = (initialModel, generateRandomOperator )
         , view = view
         , update = update
         , subscriptions = (\_ -> Sub.none )
