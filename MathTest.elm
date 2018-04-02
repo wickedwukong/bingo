@@ -21,12 +21,6 @@ type alias BasicQuestion =
   { x : Int
   , y : Int
   , operator : String
-  }
-
-type alias BasicQuestionModel =
-  { x : Int
-  , y : Int
-  , operator : String
   , seed : Seed
   }
 
@@ -68,52 +62,29 @@ initSeed : Cmd Msg
 initSeed =
   Random.generate Init seedGenerator
 
-under100Generator : String -> Generator BasicQuestion
-under100Generator operator =
-   Random.map2
-       (\x y -> BasicQuestion x y operator)
-       (Random.int 0 100)
-       (Random.int 0 100)
-
-under10Generator : String -> Generator BasicQuestion
-under10Generator operator =
-   Random.map2
-       (\x y -> BasicQuestion x y operator)
-       (Random.int 0 10)
-       (Random.int 0 10)
-
-generateBasicQuestion : String -> Cmd Msg
-generateBasicQuestion operator =
-  if (operator == "+") then
-       Random.generate RandomQuestion (under100Generator "+")
-  else if (operator == "x") then
-       Random.generate RandomQuestion (under10Generator "x")
-  else
-       Random.generate RandomQuestion (under100Generator "-")
-
-fooUnder10Generator : Seed -> String -> BasicQuestionModel
-fooUnder10Generator seed operator =
+under10Generator : Seed -> String -> BasicQuestion
+under10Generator seed operator =
    let
       (x, seed0) = Random.step (int 0 10) seed
       (y, seed1) = Random.step (int 0 10) seed0
-   in BasicQuestionModel x y operator seed1
+   in BasicQuestion x y operator seed1
 
 
-fooUnder100Generator : Seed -> String -> BasicQuestionModel
-fooUnder100Generator seed operator =
+under100Generator : Seed -> String -> BasicQuestion
+under100Generator seed operator =
    let
       (x, seed0) = Random.step (int 0 100) seed
       (y, seed1) = Random.step (int 0 100) seed0
-   in BasicQuestionModel x y operator seed1
+   in BasicQuestion x y operator seed1
 
-fooGenerateBasicQuestion : Seed -> String -> BasicQuestionModel
-fooGenerateBasicQuestion seed operator =
+generateBasicQuestion : Seed -> String -> BasicQuestion
+generateBasicQuestion seed operator =
   if (operator == "+") then
-       fooUnder100Generator seed "+"
+       under100Generator seed "+"
   else if (operator == "x") then
-       fooUnder10Generator seed "x"
+       under10Generator seed "x"
   else
-       fooUnder100Generator seed "-"
+       under100Generator seed "-"
 
 onEnter : Msg -> Attribute Msg
 onEnter msg =
@@ -127,7 +98,7 @@ onEnter msg =
         on "keydown" (Json.andThen isEnter keyCode)
 
 type Msg =
-  Solution | Input String | RandomQuestion BasicQuestion | Init Seed
+  Solution | Input String | Init Seed
 
 makeQuestion : BasicQuestion -> Question
 makeQuestion bq =
@@ -140,19 +111,8 @@ makeQuestion bq =
   else
     Question bq.y bq.x bq.operator -99999999 (bq.y - bq.x) False
 
-fooMakeQuestion : BasicQuestionModel -> Question
-fooMakeQuestion bq =
-  if (bq.operator == "+") then
-    Question bq.x bq.y bq.operator -99999999 (bq.x + bq.y) False
-  else if (bq.operator == "x") then
-    Question bq.x bq.y bq.operator -99999999 (bq.x * bq.y) False
-  else if (bq.x > bq.y) then
-    Question bq.x bq.y bq.operator -99999999 (bq.x - bq.y) False
-  else
-    Question bq.y bq.x bq.operator -99999999 (bq.y - bq.x) False
-
-fooNewQuestion : Seed -> (Question, Seed)
-fooNewQuestion seed =
+toNewQuestion : Seed -> (Question, Seed)
+toNewQuestion seed =
   let
      (operator, newSeed) =
         seed
@@ -161,22 +121,19 @@ fooNewQuestion seed =
 
      question =
        operator
-         |> fooGenerateBasicQuestion seed
-         |> fooMakeQuestion
+         |> generateBasicQuestion seed
+         |> makeQuestion
   in (question, seed)
-
-fooQuestion : Seed -> (Question, Seed)
-fooQuestion seed =
-  fooNewQuestion seed
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     Init seed ->
-      let (newQuestion, seed0) = fooQuestion seed
-      in  ({model | currentQuestion = newQuestion}, Cmd.none)
-    RandomQuestion basicQuestion ->
-      let newQuestion = makeQuestion basicQuestion
+      let
+          (newQuestion, seed0) =
+            seed
+            |> toNewQuestion
+            
       in  ({model | currentQuestion = newQuestion}, Cmd.none)
     Solution ->
       case String.toInt(model.currentInput) of
