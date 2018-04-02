@@ -219,10 +219,17 @@ showStars stars =
                (List.map (\x -> img [src "./star.jpeg", height 23, width 23] []) (List.range 1 stars))
          ]
 
+showStats : List Question -> Html msg
+showStats history =
+  div []
+        [ span [] [text ("Total questions answered: " ++ toString (List.length history))]
+        ]
+
 
 view model =
   div [class "siimple-content--fluid", align "center"]
       [ viewHeader "Hello Budding Mathematician, welcome!"
+      , showStats model.history
       , showStars model.stars
       , viewQuestion model.currentQuestion.x model.currentQuestion.operator model.currentQuestion.y model.currentInput
       -- , div [class "debug"] [text (toString model)]
