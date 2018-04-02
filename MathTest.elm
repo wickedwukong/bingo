@@ -213,7 +213,7 @@ viewFooter =
 
 showStars : Int -> Html msg
 showStars stars =
-  div []
+  div [class "siimple-h6"]
         [ span [] [text ("Stars: " ++ toString stars)]
         , div []
                (List.map (\x -> img [src "./star.jpeg", height 23, width 23] []) (List.range 1 stars))
@@ -221,8 +221,17 @@ showStars stars =
 
 showStats : List Question -> Html msg
 showStats history =
-  div []
-        [ span [] [text ("Total questions answered: " ++ toString (List.length history))]
+  let
+    totalQuestionsAnswered = List.length history
+    totalAdditionQuestions = history |> List.filter (\q -> q.operator == "+") |> List.length
+    totalSubtractionQuestions = history |> List.filter (\q -> q.operator == "-") |> List.length
+    totalMultiplicationQuestions = history |> List.filter (\q -> q.operator == "x") |> List.length
+  in
+    div []
+          [ div [] [text ("Total questions answered: " ++ toString totalQuestionsAnswered)]
+          , div [] [text ("Addition: " ++ toString totalAdditionQuestions)]
+          , div [] [text ("Subtraction: " ++ toString totalSubtractionQuestions)]
+          , div [] [text ("Multiplication: " ++ toString totalMultiplicationQuestions)]
         ]
 
 
