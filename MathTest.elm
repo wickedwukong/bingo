@@ -108,16 +108,14 @@ makeQuestion bq =
 toNewQuestion : Seed -> (Question, Seed)
 toNewQuestion seed =
   let
-     (operator, newSeed) =
+    (operator, newSeed) =
         seed
          |> Random.step (Random.int 1 3)
          |> \(number, seed0) -> ((toOperator number), seed0)
 
-     question =
-       operator
-         |> generateBasicQuestion newSeed
-         |> makeQuestion
-  in (question, newSeed)
+    basicQuestion = generateBasicQuestion newSeed operator
+    question = makeQuestion basicQuestion
+  in (question, basicQuestion.seed)
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -222,12 +220,6 @@ showStars stars =
          ]
 
 
--- [input
---    [ type_ "text"
---    , placeholder "What is your answer?"
---    , autofocus True
---    , onInput SetNameInput]]
---
 view model =
   div [class "siimple-content--fluid", align "center"]
       [ viewHeader "Hello Budding Mathematician, welcome!"
@@ -238,9 +230,6 @@ view model =
       , viewHistory model.history
       , viewFooter
       ]
-
--- main =
-  -- view initialModel
 
 main : Program Never Model Msg
 main =
