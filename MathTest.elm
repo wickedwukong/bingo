@@ -53,11 +53,6 @@ toOperator i =
     3 -> "-"
     otherWise -> Debug.crash "Out of range"
 
-randomOperatorGenerator : Random.Generator String
-randomOperatorGenerator =
-    int 1 3 |> Random.map toOperator
-
-
 initSeed : Cmd Msg
 initSeed =
   Random.generate Init seedGenerator
@@ -68,7 +63,6 @@ under10Generator seed operator =
       (x, seed0) = Random.step (int 0 10) seed
       (y, seed1) = Random.step (int 0 10) seed0
    in BasicQuestion x y operator seed1
-
 
 under100Generator : Seed -> String -> BasicQuestion
 under100Generator seed operator =
@@ -133,7 +127,7 @@ update msg model =
           (newQuestion, seed0) =
             seed
             |> toNewQuestion
-            
+
       in  ({model | currentQuestion = newQuestion}, Cmd.none)
     Solution ->
       case String.toInt(model.currentInput) of
