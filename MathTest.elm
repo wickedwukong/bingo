@@ -23,6 +23,13 @@ type alias BasicQuestion =
   , operator : String
   }
 
+type alias BasicQuestionModel =
+  { x : Int
+  , y : Int
+  , operator : String
+  , seed : Seed
+  }
+
 type alias Model =
   { stars : Int
   , currentQuestion : Question
@@ -33,12 +40,17 @@ type alias Model =
 initialModel : Model
 initialModel =
   { stars = 0
-  , currentQuestion = Question 2 5 "+" 0 7 False
+  , currentQuestion = Question 0 0 "+" -99999999 0 False
   , history = []
   , currentInput = ""
   }
 
 -- Update
+seedGenerator : Generator Seed
+seedGenerator =
+   Random.int Random.minInt Random.maxInt
+       |> Random.map (Random.initialSeed)
+
 toOperator : Int -> String
 toOperator i =
   case i of
@@ -51,9 +63,10 @@ randomOperatorGenerator : Random.Generator String
 randomOperatorGenerator =
     int 1 3 |> Random.map toOperator
 
-generateRandomOperator : Cmd Msg
-generateRandomOperator =
-  Random.generate RandomOperator randomOperatorGenerator
+
+initSeed : Cmd Msg
+initSeed =
+  Random.generate Init seedGenerator
 
 under100Generator : String -> Generator BasicQuestion
 under100Generator operator =
@@ -78,7 +91,29 @@ generateBasicQuestion operator =
   else
        Random.generate RandomQuestion (under100Generator "-")
 
+fooUnder10Generator : Seed -> String -> BasicQuestionModel
+fooUnder10Generator seed operator =
+   let
+      (x, seed0) = Random.step (int 0 10) seed
+      (y, seed1) = Random.step (int 0 10) seed0
+   in BasicQuestionModel x y operator seed1
 
+
+fooUnder100Generator : Seed -> String -> BasicQuestionModel
+fooUnder100Generator seed operator =
+   let
+      (x, seed0) = Random.step (int 0 100) seed
+      (y, seed1) = Random.step (int 0 100) seed0
+   in BasicQuestionModel x y operator seed1
+
+fooGenerateBasicQuestion : Seed -> String -> BasicQuestionModel
+fooGenerateBasicQuestion seed operator =
+  if (operator == "+") then
+       fooUnder100Generator seed "+"
+  else if (operator == "x") then
+       fooUnder10Generator seed "x"
+  else
+       fooUnder100Generator seed "-"
 
 onEnter : Msg -> Attribute Msg
 onEnter msg =
@@ -92,7 +127,7 @@ onEnter msg =
         on "keydown" (Json.andThen isEnter keyCode)
 
 type Msg =
-  Solution | Input String | RandomOperator String | RandomQuestion BasicQuestion
+  Solution | Input String | RandomQuestion BasicQuestion | Init Seed
 
 makeQuestion : BasicQuestion -> Question
 makeQuestion bq =
@@ -105,11 +140,41 @@ makeQuestion bq =
   else
     Question bq.y bq.x bq.operator -99999999 (bq.y - bq.x) False
 
+fooMakeQuestion : BasicQuestionModel -> Question
+fooMakeQuestion bq =
+  if (bq.operator == "+") then
+    Question bq.x bq.y bq.operator -99999999 (bq.x + bq.y) False
+  else if (bq.operator == "x") then
+    Question bq.x bq.y bq.operator -99999999 (bq.x * bq.y) False
+  else if (bq.x > bq.y) then
+    Question bq.x bq.y bq.operator -99999999 (bq.x - bq.y) False
+  else
+    Question bq.y bq.x bq.operator -99999999 (bq.y - bq.x) False
+
+fooNewQuestion : Seed -> (Question, Seed)
+fooNewQuestion seed =
+  let
+     (operator, newSeed) =
+        seed
+         |> Random.step (Random.int 1 3)
+         |> \(number, seed) -> ((toOperator number), seed)
+
+     question =
+       operator
+         |> fooGenerateBasicQuestion seed
+         |> fooMakeQuestion
+  in (question, seed)
+
+fooQuestion : Seed -> (Question, Seed)
+fooQuestion seed =
+  fooNewQuestion seed
+
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    RandomOperator operator ->
-      (model, generateBasicQuestion operator)
+    Init seed ->
+      let (newQuestion, seed0) = fooQuestion seed
+      in  ({model | currentQuestion = newQuestion}, Cmd.none)
     RandomQuestion basicQuestion ->
       let newQuestion = makeQuestion basicQuestion
       in  ({model | currentQuestion = newQuestion}, Cmd.none)
@@ -123,9 +188,9 @@ update msg model =
             newCurrentQuestion = {oldCurrentQuestion | answer = answer, isSolutionCorrect = isSolutionCorrect}
           in
             if (isSolutionCorrect) then
-              ({model | stars = model.stars + 1, history = newCurrentQuestion :: model.history, currentInput = ""}, generateRandomOperator)
+              ({model | stars = model.stars + 1, history = newCurrentQuestion :: model.history, currentInput = ""}, initSeed)
             else
-              ({model | history = newCurrentQuestion :: model.history, currentInput = ""}, generateRandomOperator)
+              ({model | history = newCurrentQuestion :: model.history, currentInput = ""}, initSeed)
         _ -> (model, Cmd.none)
     Input input ->
         ({model | currentInput = input}, Cmd.none)
@@ -229,7 +294,7 @@ view model =
 main : Program Never Model Msg
 main =
     Html.program
-        { init = (initialModel, generateRandomOperator )
+        { init = (initialModel, initSeed)
         , view = view
         , update = update
         , subscriptions = (\_ -> Sub.none )
