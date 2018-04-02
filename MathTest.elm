@@ -111,13 +111,13 @@ toNewQuestion seed =
      (operator, newSeed) =
         seed
          |> Random.step (Random.int 1 3)
-         |> \(number, seed) -> ((toOperator number), seed)
+         |> \(number, seed0) -> ((toOperator number), seed0)
 
      question =
        operator
-         |> generateBasicQuestion seed
+         |> generateBasicQuestion newSeed
          |> makeQuestion
-  in (question, seed)
+  in (question, newSeed)
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
