@@ -191,7 +191,7 @@ viewHeader title =
       ]
 
 viewQuestion x operator y currentInput =
-  div [class "siimple-h4"]
+  div [class "siimple-h2"]
    [ text (toString x ++ operator ++ toString y ++ "=")
    , input
        [ type_ "text"
