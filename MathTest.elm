@@ -226,12 +226,16 @@ showStats history =
     totalAdditionQuestions = history |> List.filter (\q -> q.operator == "+") |> List.length
     totalSubtractionQuestions = history |> List.filter (\q -> q.operator == "-") |> List.length
     totalMultiplicationQuestions = history |> List.filter (\q -> q.operator == "x") |> List.length
+
+    totalCorrectlyAnsweredQuestions = history |> List.filter (\q -> q.isSolutionCorrect) |> List.length
+    accuracy = (((toFloat totalCorrectlyAnsweredQuestions) / (toFloat totalQuestionsAnswered) * 10000.0) |> round |> toFloat) / 100.0
   in
     div []
           [ div [] [text ("Total questions answered: " ++ toString totalQuestionsAnswered)]
           , div [] [text ("Addition: " ++ toString totalAdditionQuestions)]
           , div [] [text ("Subtraction: " ++ toString totalSubtractionQuestions)]
           , div [] [text ("Multiplication: " ++ toString totalMultiplicationQuestions)]
+          , div [] [text ("Accuracy: " ++ toString accuracy ++ "%")]
         ]
 
 
