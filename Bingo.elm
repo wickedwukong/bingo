@@ -3,6 +3,7 @@ module Bingo exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Random
 
 type alias Entry =
   { id : Int
@@ -20,13 +21,21 @@ type alias Model =
 -- palyerInfo name gameNumber =
   -- name ++ " - Game #" ++ (toString gameNumber)
 
--- Update
-type Msg = NewGame | Mark Int
+-- Commands
+generateRandomNumber: Cmd Msg
+generateRandomNumber =
+  Random.generate (\num -> NewRandom num) (Random.int 1 100)
 
-update : Msg -> Model -> Model
+-- Update
+type Msg = NewGame | Mark Int | NewRandom Int
+
+update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    NewGame -> {model | gameNumber = model.gameNumber + 1, entries = initialEntries}
+    NewRandom num ->
+      ({model | gameNumber = num}, Cmd.none)
+    NewGame ->
+      ({model | entries = initialEntries}, generateRandomNumber)
     Mark id ->
       let
         markEntry e =
@@ -34,13 +43,13 @@ update msg model =
             {e | marked = (not e.marked)}
           else
             e
-      in {model | entries = List.map markEntry model.entries}
+      in ({model | entries = List.map markEntry model.entries}, Cmd.none)
 
 -- MODEL
 initialModel : Model
 initialModel =
   {name =  "mike"
-  ,gameNumber =  3
+  ,gameNumber =  1
   ,entries =  initialEntries
  }
 
@@ -132,6 +141,7 @@ view model =
 
 main : Program Never Model Msg
 main =
-  Html.beginnerProgram { model = initialModel
+  Html.program { init = (initialModel, generateRandomNumber)
                        , view = view
-                       , update = update}
+                       , update = update
+                       , subscriptions = (\model -> Sub.none) }
