@@ -4,6 +4,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Random
+import Http
 
 type alias Entry =
   { id : Int
@@ -26,16 +27,41 @@ generateRandomNumber: Cmd Msg
 generateRandomNumber =
   Random.generate (\num -> NewRandom num) (Random.int 1 100)
 
+entriesUrl : String
+entriesUrl =
+  "http://localhost:3000/random-entries"
+
+getEntries : Cmd Msg
+getEntries =
+  entriesUrl
+    |> Http.getString
+    |> Http.send NewEntries
+  -- Http.send (\result -> NewEntries result) (Http.getString entriesUrl)
+  -- or a long handed way of doing it:
+  -- Http.send NewEntries Http.getString entriesUrl)
+
+  -- send : (Result Http.Error String -> Msg) -> Request String -> Cmd msg
+
 -- Update
-type Msg = NewGame | Mark Int | NewRandom Int
+type Msg = NewGame | Mark Int | NewRandom Int | NewEntries (Result Http.Error String)
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
+    NewEntries (Ok jsonString) ->
+      let
+        _ = Debug.log "it worked" jsonString
+      in
+      (model, Cmd.none)
+    NewEntries (Err error) ->
+      let
+        _ = Debug.log "opps" error
+      in
+      (model, Cmd.none)
     NewRandom num ->
       ({model | gameNumber = num}, Cmd.none)
     NewGame ->
-      ({model | entries = initialEntries}, generateRandomNumber)
+      ({model | gameNumber = model.gameNumber + 1}, getEntries)
     Mark id ->
       let
         markEntry e =
@@ -50,17 +76,9 @@ initialModel : Model
 initialModel =
   {name =  "mike"
   ,gameNumber =  1
-  ,entries =  initialEntries
+  ,entries =  []
  }
 
-
-initialEntries : List Entry
-initialEntries =
-  [ Entry 1 "Future proof" 100 False
-  , Entry 2 "Doing Agile" 200 False
-  , Entry 3 "In the cloud" 300 False
-  , Entry 4 "Rock star Ninja" 300 False
-  ]
 
 
 playerInfo : String -> Int -> String
@@ -141,7 +159,7 @@ view model =
 
 main : Program Never Model Msg
 main =
-  Html.program { init = (initialModel, generateRandomNumber)
+  Html.program { init = (initialModel, getEntries)
                        , view = view
                        , update = update
                        , subscriptions = (\model -> Sub.none) }
