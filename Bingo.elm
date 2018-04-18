@@ -55,7 +55,7 @@ type Msg = NewGame
 entryDecoder: Decoder Entry
 entryDecoder =
   Decode.map4 Entry
-    (field "i" Decode.int)
+    (field "id" Decode.int)
     (field "phrase" Decode.string)
     (field "points" Decode.int)
     (succeed False)
