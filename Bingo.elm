@@ -18,6 +18,7 @@ type alias Model =
   { name : String
   , gameNumber : Int
   , entries : List Entry
+  , alertMessage : Maybe String
 }
 
 -- palyerInfo name gameNumber =
@@ -44,13 +45,17 @@ getEntries =
   -- send : (Result Http.Error String -> Msg) -> Request String -> Cmd msg
 
 -- Update
-type Msg = NewGame | Mark Int | NewRandom Int | NewEntries (Result Http.Error (List Entry))
+type Msg = NewGame
+           | Mark Int
+           | NewRandom Int
+           | NewEntries (Result Http.Error (List Entry))
+           | CloseAlert
 
 -- Json Decoder
 entryDecoder: Decoder Entry
 entryDecoder =
   Decode.map4 Entry
-    (field "id" Decode.int)
+    (field "i" Decode.int)
     (field "phrase" Decode.string)
     (field "points" Decode.int)
     (succeed False)
@@ -61,14 +66,25 @@ update msg model =
     NewEntries (Ok newEntries) ->
       ({model | entries = newEntries}, Cmd.none)
     NewEntries (Err error) ->
-      let
-        _ = Debug.log "opps" error
+     let
+        errorMessage =
+          case error of
+            Http.NetworkError ->
+                "Is the server running?"
+            Http.BadStatus response ->
+                (toString response.status)
+            Http.BadPayload message _ ->
+                "Decoding Failed: " ++ message
+            _ ->
+                (toString error)
       in
-      (model, Cmd.none)
+          ( { model | alertMessage = Just errorMessage }, Cmd.none)
     NewRandom num ->
       ({model | gameNumber = num}, Cmd.none)
     NewGame ->
       ({model | gameNumber = model.gameNumber + 1}, getEntries)
+    CloseAlert ->
+      ({model | alertMessage = Nothing}, Cmd.none)
     Mark id ->
       let
         markEntry e =
@@ -81,9 +97,10 @@ update msg model =
 -- MODEL
 initialModel : Model
 initialModel =
-  {name =  "mike"
-  ,gameNumber =  1
-  ,entries =  []
+  { name =  "mike"
+  , gameNumber =  1
+  , entries =  []
+  , alertMessage = Nothing
  }
 
 
@@ -150,6 +167,7 @@ view model =
   div [class "content"]
       [ viewHeader "BUZZWORD BINGO"
       , viewPlayer model.name model.gameNumber
+      , viewAlertMessage model.alertMessage
       , viewEntryList model.entries
       , viewScore (sumMarkedPoints model.entries)
       , div [class "button-group"]
@@ -158,6 +176,15 @@ view model =
       , viewFooter
       ]
 
+viewAlertMessage: Maybe String -> Html Msg
+viewAlertMessage alertMessage =
+  case alertMessage of
+    Just message ->
+      div [ class "alert"]
+          [ span [ class "close", onClick CloseAlert] [text "X"]
+           ,  text message]
+    Nothing ->
+      text ""
 -- main : Html Msg
 -- main =
 --   update NewGame initialModel
