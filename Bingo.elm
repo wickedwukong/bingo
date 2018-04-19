@@ -57,10 +57,11 @@ postScore model =
     -- String -> Body -> Decoder a -> Request a
     url = "http://localhost:3000/scores"
     body = encodeScore model
+             |> Http.jsonBody
 
-    request = Http.post url (Http.jsonBody body) scoreDecoder
-
-  in Http.send NewScore request
+    request = Http.post url body scoreDecoder
+  in
+   Http.send NewScore request
 
 -- Update
 type Msg = NewGame

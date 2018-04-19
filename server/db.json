@@ -69,33 +69,38 @@
     },
     {
       "name": "mike",
-      "score": 500,
+      "score": 550,
       "id": 4
     },
     {
       "name": "mike",
-      "score": 1225,
+      "score": 550,
       "id": 5
     },
     {
       "name": "mike",
-      "score": 0,
+      "score": 550,
       "id": 6
     },
     {
       "name": "mike",
-      "score": 650,
+      "score": 550,
       "id": 7
     },
     {
       "name": "mike",
-      "score": 850,
+      "score": 900,
       "id": 8
     },
     {
       "name": "mike",
-      "score": 700,
+      "score": 600,
       "id": 9
+    },
+    {
+      "name": "mike",
+      "score": 0,
+      "id": 10
     }
   ]
 }
