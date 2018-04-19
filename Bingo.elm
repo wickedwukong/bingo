@@ -6,6 +6,7 @@ import Html.Events exposing (..)
 import Random
 import Http
 import Json.Decode as Decode exposing (Decoder, field, succeed)
+import Json.Encode as Encode
 
 type alias Entry =
   { id : Int
@@ -20,6 +21,12 @@ type alias Model =
   , entries : List Entry
   , alertMessage : Maybe String
 }
+
+type alias Score =
+  { id : Int
+  , name : String
+  , score : Int
+  }
 
 -- palyerInfo name gameNumber =
   -- name ++ " - Game #" ++ (toString gameNumber)
@@ -44,14 +51,27 @@ getEntries =
 
   -- send : (Result Http.Error String -> Msg) -> Request String -> Cmd msg
 
+postScore : Model -> Cmd Msg
+postScore model =
+  let
+    -- String -> Body -> Decoder a -> Request a
+    url = "http://localhost:3000/scores"
+    body = encodeScore model
+
+    request = Http.post url (Http.jsonBody body) scoreDecoder
+
+  in Http.send NewScore request
+
 -- Update
 type Msg = NewGame
            | Mark Int
            | NewRandom Int
            | NewEntries (Result Http.Error (List Entry))
            | CloseAlert
+           | ShareScore
+           | NewScore (Result Http.Error Score)
 
--- Json Decoder
+-- Json Decoder/Encoder
 entryDecoder: Decoder Entry
 entryDecoder =
   Decode.map4 Entry
@@ -59,6 +79,21 @@ entryDecoder =
     (field "phrase" Decode.string)
     (field "points" Decode.int)
     (succeed False)
+
+scoreDecoder : Decoder Score
+scoreDecoder =
+  Decode.map3 Score
+   ( field "id" Decode.int)
+   ( field "name" Decode.string)
+   ( field "score" Decode.int)
+
+encodeScore : Model -> Encode.Value
+encodeScore model =
+  Encode.object
+      [ ("name", Encode.string model.name)
+     ,  ("score", Encode.int (sumMarkedPoints model.entries))
+     ]
+
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -81,8 +116,25 @@ update msg model =
           ( { model | alertMessage = Just errorMessage }, Cmd.none)
     NewRandom num ->
       ({model | gameNumber = num}, Cmd.none)
+    NewScore (Ok newScore) ->
+      let
+         message = "Your score "
+                     ++ (toString newScore.score)
+                     ++ " is successfully posted"
+      in
+      ( {model | alertMessage = Just message}, Cmd.none)
+    NewScore (Err error) ->
+        let
+         message = "Your score "
+                     ++ " is failed to be posted"
+                     ++ (toString error)
+      in
+      ( {model | alertMessage = Just message}, Cmd.none)
+
     NewGame ->
       ({model | gameNumber = model.gameNumber + 1}, getEntries)
+    ShareScore ->
+      ( model, postScore model)
     CloseAlert ->
       ({model | alertMessage = Nothing}, Cmd.none)
     Mark id ->
@@ -170,8 +222,9 @@ view model =
       , viewAlertMessage model.alertMessage
       , viewEntryList model.entries
       , viewScore (sumMarkedPoints model.entries)
-      , div [class "button-group"]
-            [button [onClick NewGame] [text "New Game"]]
+      , div [ class "button-group"]
+            [ button [onClick NewGame] [text "New Game"]
+            , button [onClick ShareScore] [text "Share Score"]]
       , div [class "debug"] [text (toString model)]
       , viewFooter
       ]
