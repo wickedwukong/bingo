@@ -8,6 +8,8 @@ import Http
 import Json.Decode as Decode exposing (Decoder, field, succeed)
 import Json.Encode as Encode
 
+type GameState = EnteringName | Playing
+
 type alias Entry =
   { id : Int
   , phrase : String
@@ -20,6 +22,8 @@ type alias Model =
   , gameNumber : Int
   , entries : List Entry
   , alertMessage : Maybe String
+  , nameInput : String
+  , gameState : GameState
 }
 
 type alias Score =
@@ -71,6 +75,11 @@ type Msg = NewGame
            | CloseAlert
            | ShareScore
            | NewScore (Result Http.Error Score)
+           | SetNameInput String
+           | SaveName
+           | CancelName
+           | ChangeGameState GameState
+
 
 -- Json Decoder/Encoder
 entryDecoder: Decoder Entry
@@ -115,6 +124,8 @@ update msg model =
                 (toString error)
       in
           ( { model | alertMessage = Just errorMessage }, Cmd.none)
+    ChangeGameState newGameState ->
+      ({ model | gameState = newGameState}, Cmd.none)
     NewRandom num ->
       ({model | gameNumber = num}, Cmd.none)
     NewScore (Ok newScore) ->
@@ -134,6 +145,15 @@ update msg model =
 
     NewGame ->
       ({model | gameNumber = model.gameNumber + 1}, getEntries)
+    SaveName ->
+      ({ model | name = model.nameInput,
+                 nameInput = "",
+                 gameState = Playing }, Cmd.none)
+    CancelName
+     ->
+      ({ model | nameInput = "", gameState = Playing}, Cmd.none)
+    SetNameInput newName ->
+      ({ model | nameInput = newName}, Cmd.none)
     ShareScore ->
       ( model, postScore model)
     CloseAlert ->
@@ -150,28 +170,21 @@ update msg model =
 -- MODEL
 initialModel : Model
 initialModel =
-  { name =  "mike"
+  { name =  "anonymous"
   , gameNumber =  1
   , entries =  []
   , alertMessage = Nothing
+  , nameInput = ""
+  , gameState = EnteringName
  }
-
-
-
-playerInfo : String -> Int -> String
-playerInfo =
-  \name gameNumber -> name ++ " - Game #" ++ (toString gameNumber)
 
 viewPlayer : String -> Int -> Html Msg
 viewPlayer name gameNumber =
-  let
-      playerInfoText =
-          playerInfo name gameNumber
-            |> String.toUpper
-            |> text
-  in
-      h2 [id "info", class "classy"]
-          [playerInfoText]
+  h2 [ id "info", class "classy"]
+     [ a [href "#", onClick (ChangeGameState EnteringName)] [text name]
+     , text (" - Game#" ++ (toString gameNumber))
+     ]
+
 
 viewHeader : String -> Html Msg
 viewHeader title =
@@ -200,6 +213,24 @@ viewEntryList entries =
   in
   ul [] listOfEntries
 
+viewNameInput : Model -> Html Msg
+viewNameInput model =
+  case model.gameState of
+    EnteringName ->
+      div [ class "name-input"]
+          [ input [ type_ "text"
+                  , placeholder "Who is playing?"
+                  , autofocus True
+                  , value model.nameInput
+                  , onInput SetNameInput]
+                  []
+          , button [ onClick SaveName] [ text "Save"]
+          , button [onClick CancelName
+          ] [ text "Cancel"]
+          ]
+    Playing ->
+      text ""
+
 sumMarkedPoints: List Entry -> Int
 sumMarkedPoints entries =
   entries
@@ -221,6 +252,7 @@ view model =
       [ viewHeader "BUZZWORD BINGO"
       , viewPlayer model.name model.gameNumber
       , viewAlertMessage model.alertMessage
+      , viewNameInput model
       , viewEntryList model.entries
       , viewScore (sumMarkedPoints model.entries)
       , div [ class "button-group"]
