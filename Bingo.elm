@@ -8,6 +8,8 @@ import Http
 import Json.Decode as Decode exposing (Decoder, field, succeed)
 import Json.Encode as Encode
 
+import ViewHelpers exposing (..)
+
 type GameState = EnteringName | Playing
 
 type alias Entry =
@@ -111,19 +113,7 @@ update msg model =
     NewEntries (Ok newEntries) ->
       ({model | entries = newEntries}, Cmd.none)
     NewEntries (Err error) ->
-     let
-        errorMessage =
-          case error of
-            Http.NetworkError ->
-                "Is the server running?"
-            Http.BadStatus response ->
-                (toString response.status)
-            Http.BadPayload message _ ->
-                "Decoding Failed: " ++ message
-            _ ->
-                (toString error)
-      in
-          ( { model | alertMessage = Just errorMessage }, Cmd.none)
+      ( { model | alertMessage = Just (httpErrorToMessage error) }, Cmd.none)
     ChangeGameState newGameState ->
       ({ model | gameState = newGameState}, Cmd.none)
     NewRandom num ->
@@ -134,17 +124,11 @@ update msg model =
                      ++ (toString newScore.score)
                      ++ " is successfully posted"
       in
-      ( {model | alertMessage = Just message}, Cmd.none)
+      ({ model | alertMessage = Just message}, Cmd.none)
     NewScore (Err error) ->
-        let
-         message = "Your score "
-                     ++ " is failed to be posted"
-                     ++ (toString error)
-      in
-      ( {model | alertMessage = Just message}, Cmd.none)
-
+      ({ model | alertMessage = Just (httpErrorToMessage error)}, Cmd.none)
     NewGame ->
-      ({model | gameNumber = model.gameNumber + 1}, getEntries)
+      ({ model | gameNumber = model.gameNumber + 1}, getEntries)
     SaveName ->
       ({ model | name = model.nameInput,
                  nameInput = "",
@@ -166,6 +150,19 @@ update msg model =
           else
             e
       in ({model | entries = List.map markEntry model.entries}, Cmd.none)
+
+
+httpErrorToMessage : Http.Error -> String
+httpErrorToMessage error =
+    case error of
+      Http.NetworkError ->
+          "Is the server running?"
+      Http.BadStatus response ->
+          (toString response.status)
+      Http.BadPayload message _ ->
+          "Decoding Failed: " ++ message
+      _ ->
+          (toString error)
 
 -- MODEL
 initialModel : Model
@@ -224,9 +221,8 @@ viewNameInput model =
                   , value model.nameInput
                   , onInput SetNameInput]
                   []
-          , button [ onClick SaveName] [ text "Save"]
-          , button [onClick CancelName
-          ] [ text "Cancel"]
+          , primaryButton SaveName "Save"
+          , primaryButton CancelName "Cancel"
           ]
     Playing ->
       text ""
@@ -251,26 +247,18 @@ view model =
   div [class "content"]
       [ viewHeader "BUZZWORD BINGO"
       , viewPlayer model.name model.gameNumber
-      , viewAlertMessage model.alertMessage
+      , alert CloseAlert model.alertMessage
       , viewNameInput model
       , viewEntryList model.entries
       , viewScore (sumMarkedPoints model.entries)
       , div [ class "button-group"]
-            [ button [onClick NewGame] [text "New Game"]
-            , button [onClick ShareScore] [text "Share Score"]]
+            [ primaryButton NewGame "New Game"
+            , primaryButton ShareScore "Share Score"
+            ]
       , div [class "debug"] [text (toString model)]
       , viewFooter
       ]
 
-viewAlertMessage: Maybe String -> Html Msg
-viewAlertMessage alertMessage =
-  case alertMessage of
-    Just message ->
-      div [ class "alert"]
-          [ span [ class "close", onClick CloseAlert] [text "X"]
-           ,  text message]
-    Nothing ->
-      text ""
 -- main : Html Msg
 -- main =
 --   update NewGame initialModel
