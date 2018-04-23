@@ -1,8 +1,15 @@
-module Entry exposing (..)
+module Entry exposing
+  ( Entry
+  , markEntryWithId, getEntries
+  , viewEntryList, sumMarkedPoints
+  )
 
 import Json.Decode as Decode exposing (Decoder, field, succeed)
 import Json.Encode as Encode
 import Http
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (..)
 
 
 type alias Entry =
@@ -35,3 +42,26 @@ getEntries msg url =
   (Decode.list entryDecoder)
     |> Http.get  url
     |> Http.send msg
+
+viewEntryItem: (Int -> msg) -> Entry -> Html msg
+viewEntryItem msg entry =
+  li [ classList [("marked", entry.marked)], onClick (msg entry.id)]
+   [ span [class "phrase"] [text entry.phrase]
+   , span [class "points"] [text (toString entry.points)]
+   ]
+
+viewEntryList : (Int -> msg) -> List Entry -> Html msg
+viewEntryList msg entries =
+  let
+     listOfEntries =
+       List.map (viewEntryItem msg) entries
+  in
+  ul [] listOfEntries
+
+
+sumMarkedPoints: List Entry -> Int
+sumMarkedPoints entries =
+  entries
+    |> List.filter .marked
+    |> List.map .points
+    |> List.sum

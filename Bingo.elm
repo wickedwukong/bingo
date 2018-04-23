@@ -42,7 +42,7 @@ entriesUrl =
 
 getEntries : Cmd Msg
 getEntries =
-  Entry.getEntries NewEntries "http://localhost:3000/random-entries" 
+  Entry.getEntries NewEntries "http://localhost:3000/random-entries"
   -- Http.send (\result -> NewEntries result) (Http.getString entriesUrl)
   -- or a long handed way of doing it:
   -- Http.send NewEntries Http.getString entriesUrl)
@@ -87,7 +87,7 @@ encodeScore : Model -> Encode.Value
 encodeScore model =
   Encode.object
       [ ("name", Encode.string model.name)
-     ,  ("score", Encode.int (sumMarkedPoints model.entries))
+     ,  ("score", Encode.int (Entry.sumMarkedPoints model.entries))
      ]
 
 
@@ -173,21 +173,6 @@ viewFooter =
          [text "Powered by Elm"]
       ]
 
-viewEntryItem: Entry.Entry -> Html Msg
-viewEntryItem entry =
-  li [ classList [("marked", entry.marked)], onClick (Mark entry.id)]
-   [ span [class "phrase"] [text entry.phrase]
-   , span [class "points"] [text (toString entry.points)]
-   ]
-
-viewEntryList : List Entry.Entry -> Html Msg
-viewEntryList entries =
-  let
-     listOfEntries =
-       List.map viewEntryItem entries
-  in
-  ul [] listOfEntries
-
 viewNameInput : Model -> Html Msg
 viewNameInput model =
   case model.gameState of
@@ -205,13 +190,6 @@ viewNameInput model =
     Playing ->
       text ""
 
-sumMarkedPoints: List Entry.Entry -> Int
-sumMarkedPoints entries =
-  entries
-    |> List.filter .marked
-    |> List.map .points
-    |> List.sum
-
 viewScore: Int -> Html Msg
 viewScore sum =
   div
@@ -227,8 +205,8 @@ view model =
       , viewPlayer model.name model.gameNumber
       , alert CloseAlert model.alertMessage
       , viewNameInput model
-      , viewEntryList model.entries
-      , viewScore (sumMarkedPoints model.entries)
+      , Entry.viewEntryList Mark model.entries
+      , viewScore (Entry.sumMarkedPoints model.entries)
       , div [ class "button-group"]
             [ primaryButton NewGame "New Game"
             , primaryButton ShareScore "Share Score"
